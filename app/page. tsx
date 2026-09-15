@@ -1,78 +1,161 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  Archive, ArrowLeft, BookOpen, Brain, CalendarDays, Check, ChevronLeft, CircleHelp,
-  Coins, Compass, Flame, Globe2, Home, Library as LibraryIcon, Lock, Map, Menu, MessageCircle,
-  Moon, Play, Search, Sparkles, Target, Trophy, UserRound, X, Zap
+  Bell,
+  BookOpen,
+  Brain,
+  Check,
+  ChevronLeft,
+  Flame,
+  GraduationCap,
+  LayoutDashboard,
+  Menu,
+  Moon,
+  MoreHorizontal,
+  Play,
+  Plus,
+  Search,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Sun,
+  Target,
+  Trophy,
+  Users,
+  X,
+  Zap,
 } from 'lucide-react'
 
-type Module = { id: string; label: string; icon: typeof Home }
+type Subject = {
+  name: string
+  icon: typeof Brain
+  progress: number
+  lessons: string
+  accent: string
+  description: string
+}
 
-const modules: Module[] = [
-  { id: 'home', label: 'الرئيسية', icon: Home },
-  { id: 'curriculum', label: 'البرنامج', icon: Compass },
-  { id: 'lessons', label: 'الدروس', icon: BookOpen },
-  { id: 'library', label: 'مكتبتي', icon: LibraryIcon },
-  { id: 'zikr', label: 'الأذكار', icon: Moon },
-  { id: 'rooms', label: 'غرفة دراسة', icon: UserRound },
-  { id: 'archive', label: 'بكالوريات', icon: Archive },
-  { id: 'leaderboard', label: 'المتصدرون', icon: Trophy },
-  { id: 'map', label: 'الخريطة', icon: Map },
-  { id: 'planner', label: 'المخطط', icon: CalendarDays },
-  { id: 'roadmap', label: 'مسار المراجعة', icon: Target },
-  { id: 'ai', label: 'Bac Rima19 AI', icon: Sparkles },
+type Task = {
+  id: number
+  title: string
+  detail: string
+  done: boolean
+}
+
+const subjects: Subject[] = [
+  { name: 'العلوم الطبيعية', icon: Brain, progress: 86, lessons: '24 درساً', accent: 'violet', description: 'الخلية، الوراثة والبيئة' },
+  { name: 'الفيزياء', icon: Zap, progress: 72, lessons: '18 درساً', accent: 'cyan', description: 'الميكانيك والكهرباء' },
+  { name: 'الرياضيات', icon: Target, progress: 64, lessons: '32 درساً', accent: 'amber', description: 'الدوال والاحتمالات' },
+  { name: 'العلوم الإسلامية', icon: Star, progress: 91, lessons: '12 درساً', accent: 'emerald', description: 'الفكر والقيم الإسلامية' },
+  { name: 'اللغة الإنجليزية', icon: BookOpen, progress: 58, lessons: '20 درساً', accent: 'rose', description: 'Grammar & vocabulary' },
 ]
 
-const subjects = ['العلوم الطبيعية والحياة', 'العلوم الفيزيائية', 'الرياضيات', 'اللغة العربية', 'اللغة الإنجليزية', 'اللغة الفرنسية', 'العلوم الإسلامية', 'الفلسفة', 'التاريخ', 'الجغرافيا']
-const tabs = ['ملخصات', 'خرائط تفاعلية', 'مقالات ونصوص', 'منهجية الإجابة', 'أسئلة واختبارات']
-const coins = [
-  { title: 'تركيب البروتين', type: 'ذهبية', tone: 'gold', unlocked: true, date: '12 سبتمبر 2026' },
-  { title: 'إعراب لو ولولا', type: 'فضية', tone: 'silver', unlocked: true, date: '08 سبتمبر 2026' },
-  { title: 'أخلاق الأعمال', type: 'برونزية', tone: 'bronze', unlocked: true, date: '03 سبتمبر 2026' },
-  { title: 'سلسلة 30 يوماً', type: 'ماسية', tone: 'diamond', unlocked: false },
+const initialTasks: Task[] = [
+  { id: 1, title: 'حل موضوع بكالوريا 2023', detail: 'العلوم الطبيعية · 45 دقيقة', done: true },
+  { id: 2, title: 'مراجعة وحدة تركيب البروتين', detail: 'العلوم الطبيعية · 30 دقيقة', done: false },
+  { id: 3, title: 'حفظ 15 كلمة إنجليزية', detail: 'اللغة الإنجليزية · 20 دقيقة', done: false },
+  { id: 4, title: 'تمارين الدوال الأسية', detail: 'الرياضيات · 40 دقيقة', done: false },
 ]
 
-function Logo() {
-  return <div className="brand"><div className="brand-mark"><span>ب</span><Sparkles size={13} /></div><div><strong>Bac Rima<span>19</span></strong><small>طريقك إلى النجاح</small></div></div>
+const chart = [
+  { day: 'السبت', value: 62 },
+  { day: 'الأحد', value: 48 },
+  { day: 'الإثنين', value: 76 },
+  { day: 'الثلاثاء', value: 54 },
+  { day: 'الأربعاء', value: 88 },
+  { day: 'الخميس', value: 70 },
+  { day: 'الجمعة', value: 42 },
+]
+
+const badges = [
+  { icon: Flame, title: 'شعلة البداية', text: '7 أيام متواصلة', color: 'orange' },
+  { icon: Trophy, title: 'نجمة التفوق', text: 'أكملت 5 دروس', color: 'amber' },
+  { icon: ShieldCheck, title: 'حارسة الهدف', text: '78% من الخطة', color: 'violet' },
+]
+
+const accentStyles: Record<string, { icon: string; bar: string; soft: string }> = {
+  violet: { icon: 'bg-violet-500/15 text-violet-300', bar: 'bg-violet-400', soft: 'bg-violet-400/10' },
+  cyan: { icon: 'bg-cyan-500/15 text-cyan-300', bar: 'bg-cyan-400', soft: 'bg-cyan-400/10' },
+  amber: { icon: 'bg-amber-500/15 text-amber-300', bar: 'bg-amber-400', soft: 'bg-amber-400/10' },
+  emerald: { icon: 'bg-emerald-500/15 text-emerald-300', bar: 'bg-emerald-400', soft: 'bg-emerald-400/10' },
+  rose: { icon: 'bg-rose-500/15 text-rose-300', bar: 'bg-rose-400', soft: 'bg-rose-400/10' },
 }
 
-function Sidebar({ active, setActive, open, close }: { active: string; setActive: (id: string) => void; open: boolean; close: () => void }) {
-  return <aside className={`sidebar ${open ? 'is-open' : ''}`}>
-    <div className="sidebar-top"><Logo /><button className="icon-btn mobile-only" onClick={close} aria-label="إغلاق القائمة"><X size={18} /></button></div>
-    <div className="profile-card"><div className="avatar">م</div><div><b>مكي ريمة</b><small>طالب بكالوريا · علوم تجريبية</small></div><ChevronLeft size={15} /></div>
-    <div className="level"><div><span>المستوى 12</span><b>2,480 XP</b></div><div className="progress"><i style={{ width: '72%' }} /></div></div>
-    <nav><small className="nav-label">مساحتك التعليمية</small>{modules.map(({ id, label, icon: Icon }) => <button key={id} className={active === id ? 'active' : ''} onClick={() => { setActive(id); close() }}><Icon size={17} /><span>{label}</span>{id === 'ai' && <em>جديد</em>}</button>)}</nav>
-    <div className="sidebar-bottom"><div className="coin-count"><Coins size={17} /><span>عملاتك</span><b>24</b></div><p>استمر في التعلم، أنت قريب من هدفك.</p></div>
-  </aside>
+function IconButton({ label, children }: { label: string; children: React.ReactNode }) {
+  return <button aria-label={label} className="grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-400 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white">{children}</button>
 }
 
-function Header({ title, onMenu }: { title: string; onMenu: () => void }) {
-  return <header className="topbar"><button className="icon-btn mobile-only" onClick={onMenu} aria-label="فتح القائمة"><Menu size={21} /></button><div><p className="eyebrow">الأحد، 14 سبتمبر 2026</p><h1>{title}</h1></div><div className="top-actions"><button className="search-btn"><Search size={17} /><span>ابحث في دروسك...</span><kbd>⌘ K</kbd></button><button className="notification" aria-label="الإشعارات"><span>3</span>◌</button><div className="mini-avatar">م</div></div></header>
+export default function Page() {
+  const [tasks, setTasks] = useState(initialTasks)
+  const [search, setSearch] = useState('')
+  const [dark, setDark] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const completed = tasks.filter((task) => task.done).length
+  const filteredSubjects = useMemo(() => subjects.filter((subject) => subject.name.includes(search.trim())), [search])
+
+  function toggleTask(id: number) {
+    setTasks((current) => current.map((task) => task.id === id ? { ...task, done: !task.done } : task))
+  }
+
+  return (
+    <main dir="rtl" className={dark ? 'min-h-screen bg-[#0b1020] text-slate-100' : 'min-h-screen bg-slate-100 text-slate-900'}>
+      <div className="mx-auto flex min-h-screen max-w-[1600px]">
+        {sidebarOpen && <button aria-label="إغلاق القائمة" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/60 lg:hidden" />}
+        <aside className={`fixed inset-y-0 right-0 z-30 flex w-72 flex-col border-l border-white/[0.08] bg-[#0d1427] px-5 py-6 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="mb-12 flex items-center gap-3 px-2">
+            <div className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 shadow-lg shadow-violet-500/20"><GraduationCap className="size-6 text-white" /></div>
+            <div><p className="text-lg font-black tracking-tight text-white">Bac<span className="text-cyan-300">Rima19</span></p><p className="text-[11px] text-slate-500">اصنعي مستقبلك</p></div>
+          </div>
+          <nav className="flex flex-col gap-2" aria-label="القائمة الرئيسية">
+            <a href="#dashboard" className="flex items-center gap-3 rounded-2xl bg-violet-500/15 px-4 py-3.5 text-sm font-bold text-violet-200"><LayoutDashboard className="size-5" /> لوحة التحكم</a>
+            <a href="#subjects" className="flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm text-slate-400 transition hover:bg-white/5 hover:text-white"><BookOpen className="size-5" /> موادي الدراسية</a>
+            <a href="#tasks" className="flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm text-slate-400 transition hover:bg-white/5 hover:text-white"><Check className="size-5" /> قائمة مهامي</a>
+            <a href="#badges" className="flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm text-slate-400 transition hover:bg-white/5 hover:text-white"><Trophy className="size-5" /> إنجازاتي</a>
+          </nav>
+          <div className="mt-auto rounded-3xl border border-cyan-400/10 bg-gradient-to-br from-cyan-400/10 to-violet-500/10 p-5">
+            <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-cyan-400/15 text-cyan-300"><Sparkles className="size-5" /></div>
+            <p className="mb-1 text-sm font-bold text-white">نصيحة اليوم</p><p className="text-xs leading-6 text-slate-400">النجاح ليس إنجازاً واحداً، بل عادات صغيرة تتكرر كل يوم.</p>
+          </div>
+          <button className="mt-5 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-slate-500 hover:bg-white/5 hover:text-white"><Settings className="size-5" /> الإعدادات</button>
+        </aside>
+
+        <section className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+          <header className="mb-7 flex items-center gap-3">
+            <button onClick={() => setSidebarOpen(true)} aria-label="فتح القائمة" className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-400 lg:hidden"><Menu className="size-5" /></button>
+            <div className="relative min-w-0 flex-1 max-w-xl"><Search className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-slate-500" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ابحثي عن درس، مادة أو موضوع..." className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.04] pr-11 pl-4 text-sm text-white outline-none placeholder:text-slate-600 focus:border-violet-400/50" /></div>
+            <div className="mr-auto flex items-center gap-2"><IconButton label="التنبيهات"><Bell className="size-5" /></IconButton><button onClick={() => setDark((value) => !value)} aria-label="تبديل المظهر" className="grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-400">{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}</button><div className="mr-1 grid size-10 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-400 to-violet-500 text-sm font-black text-white">ر</div></div>
+          </header>
+
+          <div id="dashboard" className="mb-7 grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
+            <section className="relative overflow-hidden rounded-[28px] border border-violet-400/15 bg-gradient-to-br from-[#211b51] via-[#171a3b] to-[#11162b] p-6 sm:p-8"><div className="absolute -left-16 -top-20 size-64 rounded-full bg-violet-500/15 blur-3xl" /><div className="relative"><div className="mb-5 flex items-center gap-2 text-sm text-cyan-300"><Sparkles className="size-4" /> الثلاثاء، 12 مارس 2024</div><h1 className="mb-3 text-2xl font-black tracking-tight text-white sm:text-3xl">أهلاً بكِ يا ريمة،<br /><span className="text-violet-300">جاهزة لصناعة نجاحك؟</span></h1><p className="mb-8 max-w-md text-sm leading-7 text-slate-400">كل خطوة تقربينك أكثر من هدفك. واصلي التقدم، أنتِ تقومين بعمل رائع!</p><div className="mb-3 flex items-center justify-between text-sm"><span className="text-slate-300">تقدمك نحو الهدف</span><strong className="text-cyan-300">78%</strong></div><div className="h-2.5 overflow-hidden rounded-full bg-white/10"><div className="h-full w-[78%] rounded-full bg-gradient-to-l from-cyan-300 to-violet-400" /></div></div></section>
+            <section className="grid grid-cols-3 gap-3 sm:gap-4 xl:grid-cols-1"><StatCard icon={Flame} value="12" label="يوم مداومة" color="orange" /><StatCard icon={Zap} value="2,480" label="نقطة خبرة" color="cyan" /><StatCard icon={BookOpen} value="34.5" label="ساعة دراسة" color="violet" /></section>
+          </div>
+
+          <div className="mb-8 flex items-end justify-between"><div><p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-violet-300">خطتك الدراسية</p><h2 className="text-xl font-black text-white sm:text-2xl">موادك الدراسية</h2></div><button className="flex items-center gap-1 text-sm font-bold text-slate-400 hover:text-white">عرض الكل <ChevronLeft className="size-4" /></button></div>
+          <section id="subjects" className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{filteredSubjects.map((subject) => <SubjectCard key={subject.name} subject={subject} />)}</section>
+
+          <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+            <section className="rounded-[26px] border border-white/[0.08] bg-white/[0.035] p-5 sm:p-6"><div className="mb-8 flex items-center justify-between"><div><h2 className="text-lg font-black text-white">تقدم الأسبوع</h2><p className="mt-1 text-xs text-slate-500">ساعات الدراسة خلال هذا الأسبوع</p></div><button className="rounded-xl border border-white/10 px-3 py-2 text-xs text-slate-400">هذا الأسبوع <ChevronLeft className="mr-1 inline size-3" /></button></div><div className="flex h-52 items-end justify-between gap-2 border-b border-white/[0.08] px-1">{chart.map((item, index) => <div key={item.day} className="flex h-full flex-1 flex-col items-center justify-end gap-3"><div className={`w-full max-w-10 rounded-t-xl transition hover:opacity-80 ${index === 4 ? 'bg-gradient-to-t from-violet-500 to-cyan-300 shadow-lg shadow-violet-500/25' : 'bg-violet-400/35'}`} style={{ height: `${item.value}%` }} /><span className="text-[10px] text-slate-500">{item.day.slice(0, 3)}</span></div>)}</div></section>
+            <section id="tasks" className="rounded-[26px] border border-white/[0.08] bg-white/[0.035] p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="text-lg font-black text-white">مهام اليوم</h2><p className="mt-1 text-xs text-slate-500">أنجزتِ {completed} من {tasks.length} مهام</p></div><button aria-label="إضافة مهمة" className="grid size-9 place-items-center rounded-xl bg-violet-500/15 text-violet-300 hover:bg-violet-500/25"><Plus className="size-4" /></button></div><div className="flex flex-col gap-3">{tasks.map((task) => <button key={task.id} onClick={() => toggleTask(task.id)} className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3 text-right transition hover:bg-white/[0.06]"><span className={`grid size-5 shrink-0 place-items-center rounded-md border ${task.done ? 'border-cyan-300 bg-cyan-300 text-[#0b1020]' : 'border-slate-600 text-transparent'}`}><Check className="size-3" /></span><span className="min-w-0 flex-1"><span className={`block truncate text-sm font-bold ${task.done ? 'text-slate-500 line-through' : 'text-slate-200'}`}>{task.title}</span><span className="mt-1 block text-[11px] text-slate-600">{task.detail}</span></span><MoreHorizontal className="size-4 shrink-0 text-slate-600" /></button>)}</div></section>
+          </div>
+
+          <section id="badges" className="mt-8 rounded-[26px] border border-white/[0.08] bg-white/[0.035] p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="text-lg font-black text-white">ألبوم الإنجازات</h2><p className="mt-1 text-xs text-slate-500">شاراتك المكتسبة أثناء رحلتك</p></div><span className="rounded-full bg-amber-400/10 px-3 py-1.5 text-xs font-bold text-amber-300">3 شارات</span></div><div className="grid gap-3 sm:grid-cols-3">{badges.map((badge) => <div key={badge.title} className="flex items-center gap-3 rounded-2xl bg-white/[0.025] p-3"><div className={`grid size-11 shrink-0 place-items-center rounded-2xl ${badge.color === 'orange' ? 'bg-orange-400/15 text-orange-300' : badge.color === 'amber' ? 'bg-amber-400/15 text-amber-300' : 'bg-violet-400/15 text-violet-300'}`}><badge.icon className="size-5" /></div><div><p className="text-sm font-bold text-slate-200">{badge.title}</p><p className="mt-1 text-[11px] text-slate-500">{badge.text}</p></div></div>)}</div></section>
+          <footer className="flex flex-col gap-2 py-8 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between"><span>BacRima19 · رحلتك نحو النجاح تبدأ هنا</span><span className="flex items-center gap-2"><Users className="size-3" /> مجتمع المتفوقات</span></footer>
+        </section>
+      </div>
+    </main>
+  )
 }
 
-function Stat({ icon: Icon, value, label, tone }: { icon: typeof Flame; value: string; label: string; tone: string }) { return <div className="stat"><div className={`stat-icon ${tone}`}><Icon size={18} /></div><div><b>{value}</b><small>{label}</small></div></div> }
-
-function Dashboard({ go }: { go: (id: string) => void }) {
-  return <div className="content-grid">
-    <section className="welcome-card"><div><span className="pill"><Sparkles size={13} /> يوم جديد للإنجاز</span><h2>أهلاً بك يا ريمة،<br /><strong>جاهزة لصناعة نجاحك؟</strong></h2><p>خطوتك الصغيرة اليوم تقربك أكثر من معدل أحلامك.</p><button className="primary" onClick={() => go('lessons')}>ابدئي جلسة الدراسة <ArrowLeft size={16} /></button></div><div className="orbit"><div className="orbit-inner"><span>78%</span><small>هدفك الشهري</small></div></div></section>
-    <section className="stats-row"><Stat icon={Flame} value="12 يوم" label="سلسلة متواصلة" tone="coral" /><Stat icon={Zap} value="2,480" label="نقاط الخبرة" tone="violet" /><Stat icon={Coins} value="24" label="عملات مكتسبة" tone="gold" /></section>
-    <section className="panel continue"><div className="section-head"><div><span className="eyebrow">آخر نشاط</span><h3>واصلي من حيث توقفتِ</h3></div><button className="text-btn" onClick={() => go('lessons')}>كل الدروس <ChevronLeft size={15} /></button></div><div className="lesson-row"><div className="lesson-icon biology">DNA</div><div className="lesson-info"><b>تركيب البروتين</b><small>العلوم الطبيعية والحياة · الوحدة 02</small><div className="bar"><i style={{ width: '68%' }} /></div></div><span className="percent">68%</span><button className="circle-play" aria-label="متابعة الدرس" onClick={() => go('lessons')}><Play size={14} fill="currentColor" /></button></div></section>
-    <section className="panel weekly"><div className="section-head"><div><span className="eyebrow">هذا الأسبوع</span><h3>رحلة التقدم</h3></div><span className="trend">+18% <span>من الأسبوع الماضي</span></span></div><div className="chart"><div className="chart-line"><i style={{ height: '42%' }} /><i style={{ height: '58%' }} /><i style={{ height: '37%' }} /><i style={{ height: '76%' }} /><i style={{ height: '63%' }} /><i style={{ height: '88%' }} /><i style={{ height: '71%' }} /></div><div className="chart-labels"><span>سبت</span><span>أحد</span><span>اثن</span><span>ثلث</span><span>أربع</span><span>خمس</span><span>جمع</span></div></div></section>
-    <section className="panel goals"><div className="section-head"><div><span className="eyebrow">أهداف اليوم</span><h3>ثلاث خطوات تكفي</h3></div><span className="goal-count">1 / 3</span></div>{['مراجعة درس المناعة', 'حل موضوع بكالوريا 2024', 'حفظ 15 كلمة إنجليزية'].map((x, i) => <button className={`check-row ${i === 0 ? 'done' : ''}`} key={x} onClick={(e) => e.currentTarget.classList.toggle('done')}><span className="check">{i === 0 && <Check size={13} />}</span><span>{x}</span><small>{i === 0 ? 'مكتمل' : i === 1 ? '30 دقيقة' : '15 دقيقة'}</small></button>)}</section>
-    <section className="panel coins-panel"><div className="section-head"><div><span className="eyebrow">ألبومك</span><h3>عملات الإنجاز</h3></div><button className="text-btn" onClick={() => go('library')}>عرض الألبوم <ChevronLeft size={15} /></button></div><div className="coin-mini-row">{coins.slice(0, 3).map(c => <div className={`coin-mini ${c.tone}`} key={c.title}><span>{c.tone === 'gold' ? 'DNA' : c.tone === 'silver' ? 'لو' : 'أخ'}</span></div>)}</div><p className="coin-note"><Trophy size={14} /> افتحي عملة جديدة بإكمال جلسة اليوم</p></section>
-  </div>
+function StatCard({ icon: Icon, value, label, color }: { icon: typeof Flame; value: string; label: string; color: string }) {
+  const colors = { orange: 'bg-orange-400/15 text-orange-300', cyan: 'bg-cyan-400/15 text-cyan-300', violet: 'bg-violet-400/15 text-violet-300' }
+  return <div className="rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4"><div className={`mb-3 grid size-9 place-items-center rounded-xl ${colors[color as keyof typeof colors]}`}><Icon className="size-4" /></div><p className="text-xl font-black text-white">{value}</p><p className="mt-1 text-[11px] text-slate-500">{label}</p></div>
 }
 
-function Lessons() {
-  const [subject, setSubject] = useState(0); const [tab, setTab] = useState(0); const [flipped, setFlipped] = useState(false)
-  return <div className="lessons-view"><div className="subject-strip">{subjects.map((s, i) => <button className={subject === i ? 'selected' : ''} key={s} onClick={() => setSubject(i)}>{s}</button>)}</div><section className="lesson-hero"><div><span className="pill">الوحدة 02 · 5 دروس</span><h2>{subjects[subject]}</h2><p>محتوى مرتب، ملخصات ذكية واختبارات تساعدك على تثبيت المعرفة.</p></div><div className="subject-progress"><b>68%</b><small>منجز</small><div className="progress"><i style={{ width: '68%' }} /></div></div></section><div className="tabs">{tabs.map((t, i) => <button className={tab === i ? 'active' : ''} key={t} onClick={() => setTab(i)}>{t}</button>)}</div><div className="lesson-body"><div className="panel chapter-card"><span className="eyebrow">ملخص الوحدة</span><h3>{tab === 0 ? 'من المعلومة إلى البروتين' : tabs[tab]}</h3><p>اكتشفي المفاهيم الأساسية بطريقة بصرية ومبسطة، مع أمثلة من نماذج البكالوريا السابقة.</p><div className="concepts"><span>الاستنساخ</span><span>الترجمة</span><span>ARNm</span><span>الشفرة الوراثية</span></div><button className="primary"><Play size={15} fill="currentColor" /> ابدئي المراجعة</button></div><div className="panel flashcard"><span className="eyebrow">بطاقة سريعة</span><button className={`flip-card ${flipped ? 'flipped' : ''}`} onClick={() => setFlipped(!flipped)}><div className="front"><small>اضغطي للكشف</small><b>What is<br />Embezzlement?</b><span>English · Ethics in Business</span></div><div className="back"><small>التعريف</small><b>اختلاس</b><span>أخذ المال أو الممتلكات بشكل غير قانوني</span></div></button><div className="card-nav"><button>السابق</button><span>03 / 12</span><button>التالي <ChevronLeft size={13} /></button></div></div></div></div>
+function SubjectCard({ subject }: { subject: Subject }) {
+  const style = accentStyles[subject.accent]
+  return <article className="group rounded-[22px] border border-white/[0.08] bg-white/[0.035] p-4 transition hover:-translate-y-1 hover:border-white/20"><div className="mb-5 flex items-start justify-between"><div className={`grid size-11 place-items-center rounded-2xl ${style.icon}`}><subject.icon className="size-5" /></div><button aria-label={`خيارات ${subject.name}`} className="text-slate-600 hover:text-white"><MoreHorizontal className="size-5" /></button></div><h3 className="mb-1 text-sm font-black text-white">{subject.name}</h3><p className="mb-5 text-[11px] text-slate-500">{subject.description}</p><div className="mb-2 flex items-center justify-between text-[11px]"><span className="text-slate-500">{subject.lessons}</span><strong className="text-slate-300">{subject.progress}%</strong></div><div className="mb-4 h-1.5 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${style.bar}`} style={{ width: `${subject.progress}%` }} /></div><button className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.06] py-2.5 text-xs font-bold text-slate-300 transition group-hover:bg-violet-500/15 group-hover:text-violet-200"><Play className="size-3 fill-current" /> متابعة الدرس</button></article>
 }
-
-function Library() { const [selected, setSelected] = useState<number | null>(null); return <div className="library-view"><div className="page-intro"><div><span className="eyebrow">مجموعتك الخاصة</span><h2>ألبوم العملات التذكارية</h2><p>كل إنجاز يترك أثراً. اجمعي العملات واصنعي قصتك.</p></div><div className="album-total"><Coins size={19} /><b>3 / 24</b><small>عملات مكتسبة</small></div></div><div className="coin-grid">{coins.concat([{ title: 'قوانين نيوتن', type: 'فضية', tone: 'silver', unlocked: false }, { title: 'معدل 18+', type: 'ذهبية', tone: 'gold', unlocked: false }]).map((c, i) => <button className={`big-coin-card ${!c.unlocked ? 'locked' : ''}`} key={i} onClick={() => c.unlocked && setSelected(i)}><div className={`big-coin ${c.tone}`}>{c.unlocked ? <span>{i === 0 ? 'DNA' : i === 1 ? 'لو' : 'أخ'}</span> : <Lock size={21} />}</div><b>{c.title}</b><small>{c.type} · {c.unlocked ? c.date : 'لم تفتح بعد'}</small></button>)}</div>{selected !== null && <div className="modal-backdrop" onClick={() => setSelected(null)}><div className="coin-modal" onClick={e => e.stopPropagation()}><button className="close-modal" onClick={() => setSelected(null)}><X size={18} /></button><div className={`big-coin modal-coin ${coins[selected].tone}`}><span>{selected === 0 ? 'DNA' : selected === 1 ? 'لو' : 'أخ'}</span></div><span className="pill">عملة {coins[selected].type}</span><h2>عملة {coins[selected].title}</h2><p>أُضيفت إلى مجموعتك بعد إتمام تحدي الوحدة بنجاح.</p><small>تاريخ الإضافة: {coins[selected].date}</small></div></div>}</div> }
-
-function Generic({ id }: { id: string }) { const item = modules.find(m => m.id === id); return <div className="generic-view"><div className="empty-illustration"><Brain size={31} /></div><span className="pill">قريباً في Bac Rima19</span><h2>{item?.label}</h2><p>نحضّر لك تجربة تعليمية متكاملة. هذه المساحة قيد التحسين، لكنها ستكون جاهزة لترافقك في رحلتك نحو النجاح.</p><div className="maintenance"><Sparkles size={16} /> المحتوى يتطور معك، عودي قريباً</div></div> }
-
-
-
-export default function Page() { const [active, setActive] = useState('home'); const [drawer, setDrawer] = useState(false); const current = modules.find(m => m.id === active); const view = active === 'home' ? <Dashboard go={setActive} /> : active === 'lessons' ? <Lessons /> : active === 'library' ? <Library /> : <Generic id={active} />; return <main className="app-shell" dir="rtl"><Sidebar active={active} setActive={setActive} open={drawer} close={() => setDrawer(false)} />{drawer && <button className="scrim" aria-label="إغلاق" onClick={() => setDrawer(false)} />}<div className="main-area"><Header title={current?.label || 'الرئيسية'} onMenu={() => setDrawer(true)} /><div className="page-content">{view}</div></div></main> }
