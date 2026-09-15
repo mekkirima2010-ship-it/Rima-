@@ -1,0 +1,76 @@
+'use client'
+
+import { useState } from 'react'
+import {
+  Archive, ArrowLeft, BookOpen, Brain, CalendarDays, Check, ChevronLeft, CircleHelp,
+  Coins, Compass, Flame, Globe2, Home, Library as LibraryIcon, Lock, Map, Menu, MessageCircle,
+  Moon, Play, Search, Sparkles, Target, Trophy, UserRound, X, Zap
+} from 'lucide-react'
+
+type Module = { id: string; label: string; icon: typeof Home }
+
+const modules: Module[] = [
+  { id: 'home', label: 'الرئيسية', icon: Home },
+  { id: 'curriculum', label: 'البرنامج', icon: Compass },
+  { id: 'lessons', label: 'الدروس', icon: BookOpen },
+  { id: 'library', label: 'مكتبتي', icon: LibraryIcon },
+  { id: 'zikr', label: 'الأذكار', icon: Moon },
+  { id: 'rooms', label: 'غرفة دراسة', icon: UserRound },
+  { id: 'archive', label: 'بكالوريات', icon: Archive },
+  { id: 'leaderboard', label: 'المتصدرون', icon: Trophy },
+  { id: 'map', label: 'الخريطة', icon: Map },
+  { id: 'planner', label: 'المخطط', icon: CalendarDays },
+  { id: 'roadmap', label: 'مسار المراجعة', icon: Target },
+  { id: 'ai', label: 'Bac Rima19 AI', icon: Sparkles },
+]
+
+const subjects = ['العلوم الطبيعية والحياة', 'العلوم الفيزيائية', 'الرياضيات', 'اللغة العربية', 'اللغة الإنجليزية', 'اللغة الفرنسية', 'العلوم الإسلامية', 'الفلسفة', 'التاريخ', 'الجغرافيا']
+const tabs = ['ملخصات', 'خرائط تفاعلية', 'مقالات ونصوص', 'منهجية الإجابة', 'أسئلة واختبارات']
+const coins = [
+  { title: 'تركيب البروتين', type: 'ذهبية', tone: 'gold', unlocked: true, date: '12 سبتمبر 2026' },
+  { title: 'إعراب لو ولولا', type: 'فضية', tone: 'silver', unlocked: true, date: '08 سبتمبر 2026' },
+  { title: 'أخلاق الأعمال', type: 'برونزية', tone: 'bronze', unlocked: true, date: '03 سبتمبر 2026' },
+  { title: 'سلسلة 30 يوماً', type: 'ماسية', tone: 'diamond', unlocked: false },
+]
+
+function Logo() {
+  return <div className="brand"><div className="brand-mark"><span>ب</span><Sparkles size={13} /></div><div><strong>Bac Rima<span>19</span></strong><small>طريقك إلى النجاح</small></div></div>
+}
+
+function Sidebar({ active, setActive, open, close }: { active: string; setActive: (id: string) => void; open: boolean; close: () => void }) {
+  return <aside className={`sidebar ${open ? 'is-open' : ''}`}>
+    <div className="sidebar-top"><Logo /><button className="icon-btn mobile-only" onClick={close} aria-label="إغلاق القائمة"><X size={18} /></button></div>
+    <div className="profile-card"><div className="avatar">م</div><div><b>مكي ريمة</b><small>طالب بكالوريا · علوم تجريبية</small></div><ChevronLeft size={15} /></div>
+    <div className="level"><div><span>المستوى 12</span><b>2,480 XP</b></div><div className="progress"><i style={{ width: '72%' }} /></div></div>
+    <nav><small className="nav-label">مساحتك التعليمية</small>{modules.map(({ id, label, icon: Icon }) => <button key={id} className={active === id ? 'active' : ''} onClick={() => { setActive(id); close() }}><Icon size={17} /><span>{label}</span>{id === 'ai' && <em>جديد</em>}</button>)}</nav>
+    <div className="sidebar-bottom"><div className="coin-count"><Coins size={17} /><span>عملاتك</span><b>24</b></div><p>استمر في التعلم، أنت قريب من هدفك.</p></div>
+  </aside>
+}
+
+function Header({ title, onMenu }: { title: string; onMenu: () => void }) {
+  return <header className="topbar"><button className="icon-btn mobile-only" onClick={onMenu} aria-label="فتح القائمة"><Menu size={21} /></button><div><p className="eyebrow">الأحد، 14 سبتمبر 2026</p><h1>{title}</h1></div><div className="top-actions"><button className="search-btn"><Search size={17} /><span>ابحث في دروسك...</span><kbd>⌘ K</kbd></button><button className="notification" aria-label="الإشعارات"><span>3</span>◌</button><div className="mini-avatar">م</div></div></header>
+}
+
+function Stat({ icon: Icon, value, label, tone }: { icon: typeof Flame; value: string; label: string; tone: string }) { return <div className="stat"><div className={`stat-icon ${tone}`}><Icon size={18} /></div><div><b>{value}</b><small>{label}</small></div></div> }
+
+function Dashboard({ go }: { go: (id: string) => void }) {
+  return <div className="content-grid">
+    <section className="welcome-card"><div><span className="pill"><Sparkles size={13} /> يوم جديد للإنجاز</span><h2>أهلاً بك يا ريمة،<br /><strong>جاهزة لصناعة نجاحك؟</strong></h2><p>خطوتك الصغيرة اليوم تقربك أكثر من معدل أحلامك.</p><button className="primary" onClick={() => go('lessons')}>ابدئي جلسة الدراسة <ArrowLeft size={16} /></button></div><div className="orbit"><div className="orbit-inner"><span>78%</span><small>هدفك الشهري</small></div></div></section>
+    <section className="stats-row"><Stat icon={Flame} value="12 يوم" label="سلسلة متواصلة" tone="coral" /><Stat icon={Zap} value="2,480" label="نقاط الخبرة" tone="violet" /><Stat icon={Coins} value="24" label="عملات مكتسبة" tone="gold" /></section>
+    <section className="panel continue"><div className="section-head"><div><span className="eyebrow">آخر نشاط</span><h3>واصلي من حيث توقفتِ</h3></div><button className="text-btn" onClick={() => go('lessons')}>كل الدروس <ChevronLeft size={15} /></button></div><div className="lesson-row"><div className="lesson-icon biology">DNA</div><div className="lesson-info"><b>تركيب البروتين</b><small>العلوم الطبيعية والحياة · الوحدة 02</small><div className="bar"><i style={{ width: '68%' }} /></div></div><span className="percent">68%</span><button className="circle-play" aria-label="متابعة الدرس" onClick={() => go('lessons')}><Play size={14} fill="currentColor" /></button></div></section>
+    <section className="panel weekly"><div className="section-head"><div><span className="eyebrow">هذا الأسبوع</span><h3>رحلة التقدم</h3></div><span className="trend">+18% <span>من الأسبوع الماضي</span></span></div><div className="chart"><div className="chart-line"><i style={{ height: '42%' }} /><i style={{ height: '58%' }} /><i style={{ height: '37%' }} /><i style={{ height: '76%' }} /><i style={{ height: '63%' }} /><i style={{ height: '88%' }} /><i style={{ height: '71%' }} /></div><div className="chart-labels"><span>سبت</span><span>أحد</span><span>اثن</span><span>ثلث</span><span>أربع</span><span>خمس</span><span>جمع</span></div></div></section>
+    <section className="panel goals"><div className="section-head"><div><span className="eyebrow">أهداف اليوم</span><h3>ثلاث خطوات تكفي</h3></div><span className="goal-count">1 / 3</span></div>{['مراجعة درس المناعة', 'حل موضوع بكالوريا 2024', 'حفظ 15 كلمة إنجليزية'].map((x, i) => <button className={`check-row ${i === 0 ? 'done' : ''}`} key={x} onClick={(e) => e.currentTarget.classList.toggle('done')}><span className="check">{i === 0 && <Check size={13} />}</span><span>{x}</span><small>{i === 0 ? 'مكتمل' : i === 1 ? '30 دقيقة' : '15 دقيقة'}</small></button>)}</section>
+    <section className="panel coins-panel"><div className="section-head"><div><span className="eyebrow">ألبومك</span><h3>عملات الإنجاز</h3></div><button className="text-btn" onClick={() => go('library')}>عرض الألبوم <ChevronLeft size={15} /></button></div><div className="coin-mini-row">{coins.slice(0, 3).map(c => <div className={`coin-mini ${c.tone}`} key={c.title}><span>{c.tone === 'gold' ? 'DNA' : c.tone === 'silver' ? 'لو' : 'أخ'}</span></div>)}</div><p className="coin-note"><Trophy size={14} /> افتحي عملة جديدة بإكمال جلسة اليوم</p></section>
+  </div>
+}
+
+function Lessons() {
+  const [subject, setSubject] = useState(0); const [tab, setTab] = useState(0); const [flipped, setFlipped] = useState(false)
+  return <div className="lessons-view"><div className="subject-strip">{subjects.map((s, i) => <button className={subject === i ? 'selected' : ''} key={s} onClick={() => setSubject(i)}>{s}</button>)}</div><section className="lesson-hero"><div><span className="pill">الوحدة 02 · 5 دروس</span><h2>{subjects[subject]}</h2><p>محتوى مرتب، ملخصات ذكية واختبارات تساعدك على تثبيت المعرفة.</p></div><div className="subject-progress"><b>68%</b><small>منجز</small><div className="progress"><i style={{ width: '68%' }} /></div></div></section><div className="tabs">{tabs.map((t, i) => <button className={tab === i ? 'active' : ''} key={t} onClick={() => setTab(i)}>{t}</button>)}</div><div className="lesson-body"><div className="panel chapter-card"><span className="eyebrow">ملخص الوحدة</span><h3>{tab === 0 ? 'من المعلومة إلى البروتين' : tabs[tab]}</h3><p>اكتشفي المفاهيم الأساسية بطريقة بصرية ومبسطة، مع أمثلة من نماذج البكالوريا السابقة.</p><div className="concepts"><span>الاستنساخ</span><span>الترجمة</span><span>ARNm</span><span>الشفرة الوراثية</span></div><button className="primary"><Play size={15} fill="currentColor" /> ابدئي المراجعة</button></div><div className="panel flashcard"><span className="eyebrow">بطاقة سريعة</span><button className={`flip-card ${flipped ? 'flipped' : ''}`} onClick={() => setFlipped(!flipped)}><div className="front"><small>اضغطي للكشف</small><b>What is<br />Embezzlement?</b><span>English · Ethics in Business</span></div><div className="back"><small>التعريف</small><b>اختلاس</b><span>أخذ المال أو الممتلكات بشكل غير قانوني</span></div></button><div className="card-nav"><button>السابق</button><span>03 / 12</span><button>التالي <ChevronLeft size={13} /></button></div></div></div></div>
+}
+
+function Library() { const [selected, setSelected] = useState<number | null>(null); return <div className="library-view"><div className="page-intro"><div><span className="eyebrow">مجموعتك الخاصة</span><h2>ألبوم العملات التذكارية</h2><p>كل إنجاز يترك أثراً. اجمعي العملات واصنعي قصتك.</p></div><div className="album-total"><Coins size={19} /><b>3 / 24</b><small>عملات مكتسبة</small></div></div><div className="coin-grid">{coins.concat([{ title: 'قوانين نيوتن', type: 'فضية', tone: 'silver', unlocked: false }, { title: 'معدل 18+', type: 'ذهبية', tone: 'gold', unlocked: false }]).map((c, i) => <button className={`big-coin-card ${!c.unlocked ? 'locked' : ''}`} key={i} onClick={() => c.unlocked && setSelected(i)}><div className={`big-coin ${c.tone}`}>{c.unlocked ? <span>{i === 0 ? 'DNA' : i === 1 ? 'لو' : 'أخ'}</span> : <Lock size={21} />}</div><b>{c.title}</b><small>{c.type} · {c.unlocked ? c.date : 'لم تفتح بعد'}</small></button>)}</div>{selected !== null && <div className="modal-backdrop" onClick={() => setSelected(null)}><div className="coin-modal" onClick={e => e.stopPropagation()}><button className="close-modal" onClick={() => setSelected(null)}><X size={18} /></button><div className={`big-coin modal-coin ${coins[selected].tone}`}><span>{selected === 0 ? 'DNA' : selected === 1 ? 'لو' : 'أخ'}</span></div><span className="pill">عملة {coins[selected].type}</span><h2>عملة {coins[selected].title}</h2><p>أُضيفت إلى مجموعتك بعد إتمام تحدي الوحدة بنجاح.</p><small>تاريخ الإضافة: {coins[selected].date}</small></div></div>}</div> }
+
+function Generic({ id }: { id: string }) { const item = modules.find(m => m.id === id); return <div className="generic-view"><div className="empty-illustration"><Brain size={31} /></div><span className="pill">قريباً في Bac Rima19</span><h2>{item?.label}</h2><p>نحضّر لك تجربة تعليمية متكاملة. هذه المساحة قيد التحسين، لكنها ستكون جاهزة لترافقك في رحلتك نحو النجاح.</p><div className="maintenance"><Sparkles size={16} /> المحتوى يتطور معك، عودي قريباً</div></div> }
+
+export default function Page() { const [active, setActive] = useState('home'); const [drawer, setDrawer] = useState(false); const current = modules.find(m => m.id === active); const view = active === 'home' ? <Dashboard go={setActive} /> : active === 'lessons' ? <Lessons /> : active === 'library' ? <Library /> : <Generic id={active} />; return <main className="app-shell" dir="rtl"><Sidebar active={active} setActive={setActive} open={drawer} close={() => setDrawer(false)} />{drawer && <button className="scrim" aria-label="إغلاق" onClick={() => setDrawer(false)} />}<div className="main-area"><Header title={current?.label || 'الرئيسية'} onMenu={() => setDrawer(true)} /><div className="page-content">{view}</div></div></main> }
